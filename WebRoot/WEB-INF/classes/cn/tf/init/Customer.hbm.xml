@@ -15,7 +15,14 @@
 			<key column="customer_id" ></key>
 			<one-to-many class="Order" />
 		</set>
-		
+		<!-- 局部 -->
+		<query name="findAllCustomer2">from Customer</query>
 	</class>
+	
+	<!-- 配置全局hql -->
+	<query name="findAllCustomer">from Customer</query>
+	
+	
+	
 </hibernate-mapping>
 

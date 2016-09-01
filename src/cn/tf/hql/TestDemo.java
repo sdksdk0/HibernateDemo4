@@ -9,6 +9,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -67,7 +68,7 @@ public class TestDemo {
 	*/
 	
 	//通过id查询
-/*	@Test
+	@Test
 	public void test2(){
 		Session session = factory.openSession();
 		session.beginTransaction();
@@ -86,10 +87,10 @@ public class TestDemo {
 		
 		session.getTransaction().commit();
 		session.close();
-	}*/
+	}
 	
 	//排序
-/*	@Test
+	@Test
 	public void test3(){
 		Session session = factory.openSession();
 		session.beginTransaction();
@@ -108,10 +109,10 @@ public class TestDemo {
 		
 		session.getTransaction().commit();
 		session.close();
-	}*/
+	}
 	
 	//投影
-/*	@Test
+	@Test
 	public void test4(){
 		Session session = factory.openSession();
 		session.beginTransaction();
@@ -137,11 +138,11 @@ public class TestDemo {
 		
 		session.getTransaction().commit();
 		session.close();
-	}*/
+	}
 	
 	
 	//分页查询,setFirstResult(),setMaxResult()
-/*	@Test
+	@Test
 	public void test5(){
 		Session session = factory.openSession();
 		session.beginTransaction();
@@ -164,7 +165,7 @@ public class TestDemo {
 		
 		session.getTransaction().commit();
 		session.close();
-	}*/
+	}
 	
 	//绑定参数
 	/**
@@ -176,16 +177,16 @@ public class TestDemo {
 	 * 
 	 */
 	
-	@Test
+	/*@Test
 	public void test6(){
 		Session session = factory.openSession();
 		session.beginTransaction();
 		
 		//1、HQL
-		/*Customer  customer=(Customer) session.createQuery("from Customer  c where c.cid= ? ")
+		Customer  customer=(Customer) session.createQuery("from Customer  c where c.cid= ? ")
 				//.setInteger(0, 1)  
 				.setParameter(0, 1)
-				.uniqueResult();*/
+				.uniqueResult();
 
 		Customer  customer=(Customer) session.createQuery("from Customer  c where c.cid=:cid")
 				.setInteger("cid", 1)  
@@ -197,7 +198,108 @@ public class TestDemo {
 		
 		session.getTransaction().commit();
 		session.close();
+	}*/
+	 
+	
+	//聚合查询
+	@Test
+	public void test7(){
+		Session session = factory.openSession();
+		session.beginTransaction();
+		
+		//Object obj=session.createQuery("select count(*) from Customer").uniqueResult();
+		
+		//Object obj=session.createQuery("select count(*) from Customer").uniqueResult();
+		
+		Long  numLong=(Long) session.createQuery("select count(*) from Customer").uniqueResult();
+		int num=numLong.intValue();
+		//输出
+
+		//2 sql
+		//BigInteger numObj = (BigInteger) session.createSQLQuery("select count(cid) from t_customer").uniqueResult();
+				
+		//3 qbc
+		Long numObj = (Long)session.createCriteria(Customer.class)
+					.setProjection(
+							Projections.projectionList()
+							.add(Projections.rowCount())
+						)
+					.uniqueResult();
+
+		System.out.println(num);
+		
+		session.getTransaction().commit();
+		session.close();
 	}
 	
-
+	
+	//连接查询
+		@Test
+		public void test8(){
+			Session session = factory.openSession();
+			session.beginTransaction();
+			
+			//左外连接,将每一条查询结果封装到Customer 和Order对象，然后创建 new Object[2]{c,o} 。将所有的数组 存放到另一个数组返回
+			//List<Customer> allCustomer=session.createQuery("from  Customer  c left outer join  c.orderSet ").list();
+			
+			//迫切左外连接，将所有的查询结果封装Customer和Order对象，然后将Order 添加到 Customer(customer.getOrderSet().add(order)) ,最后返回Customer对象集合
+			List<Customer> allCustomer=session.createQuery("  select distinct c from Customer  c left outer join fetch  c.orderSet ").list();
+			
+			//输出
+			for (Customer customer : allCustomer) {
+				System.out.println(customer);
+			}
+			
+			session.getTransaction().commit();
+			session.close();
+		}
+		
+	
+	//命名查询
+	@Test
+	public void test9(){
+		Session session = factory.openSession();
+		session.beginTransaction();
+		//全局
+		@SuppressWarnings("unchecked")
+		List<Customer>  allCustomer=(List<Customer> )session.getNamedQuery("findAllCustomer").list();
+		
+		
+		//局部
+		//List<Customer>  allCustomer=(List<Customer> )session.getNamedQuery("cn.tf.init.Customer.findAllCustomer2").list();
+		
+		
+		
+		for (Customer customer : allCustomer) {
+			System.out.println(customer);
+		}
+		
+		
+		session.getTransaction().commit();
+		session.close();
+	}
+		
+	//离线查询
+	@Test
+	public void test10(){
+		Session session = factory.openSession();
+		session.beginTransaction();
+		//离线
+		DetachedCriteria detachedcriteria=DetachedCriteria.forClass(Customer.class)
+				.add(Restrictions.eq("cid", 1));
+		
+		
+		Criteria criteria=detachedcriteria.getExecutableCriteria(session);
+		List<Customer> allCustomer=criteria.list();
+		for (Customer customer : allCustomer) {
+			System.out.println(customer);
+		}
+		
+		
+		session.getTransaction().commit();
+		session.close();
+	}
+	
+	
+		
 }
