@@ -1,0 +1,34 @@
+<?xml version="1.0"  encoding="UTF-8" ?>
+
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping >
+	<class  name="cn.tf.inherit.joinedclass.Employee"   table="j_employee"   discriminator-value="员工">
+		<id  name="eid">
+			<generator class="native"></generator>
+		</id>
+		
+		<discriminator column="etemp"></discriminator>
+
+		<property name="name"></property>
+
+	<joined-subclass  name="cn.tf.inherit.joinedclass.HourEmployee"  table="j_hour">
+		<key column="hid"></key>
+		<property name="rate"></property>
+	</joined-subclass>
+	<joined-subclass  name="cn.tf.inherit.joinedclass.SalaryEmployee"  table="j_salary">
+		<key column="sid"></key>
+		<property name="salary"></property>
+	</joined-subclass>	
+		
+		
+		
+	
+	</class>
+	
+	
+	
+</hibernate-mapping>
+
