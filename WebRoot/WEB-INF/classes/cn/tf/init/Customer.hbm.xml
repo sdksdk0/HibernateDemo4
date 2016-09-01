@@ -11,7 +11,7 @@
 		</id>
 		<property name="name"></property>
 		
-		<set name="orderSet">
+		<set name="orderSet"   fetch="select"  lazy="false">
 			<key column="customer_id" ></key>
 			<one-to-many class="Order" />
 		</set>
